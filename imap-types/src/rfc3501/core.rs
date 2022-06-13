@@ -30,6 +30,7 @@ use crate::utils::indicators::{
 #[cfg_attr(feature = "bounded-static", derive(ToStatic))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[serde(transparent)]
 pub struct Atom<'a> {
     pub(crate) inner: Cow<'a, str>,
 }
@@ -90,6 +91,7 @@ impl<'a> Deref for Atom<'a> {
 #[cfg_attr(feature = "bounded-static", derive(ToStatic))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[serde(transparent)]
 pub struct AtomExt<'a> {
     pub(crate) inner: Cow<'a, str>,
 }
@@ -288,6 +290,7 @@ impl<'a> Deref for Literal<'a> {
 #[cfg_attr(feature = "bounded-static", derive(ToStatic))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[serde(transparent)]
 pub struct Quoted<'a> {
     pub(crate) inner: Cow<'a, str>,
 }
@@ -356,6 +359,7 @@ impl<'a> Deref for Quoted<'a> {
 #[cfg_attr(feature = "bounded-static", derive(ToStatic))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[serde(transparent)]
 // This wrapper is merely used for formatting.
 // The inner value can be public.
 pub struct NString<'a> {
@@ -442,6 +446,7 @@ impl<'a> TryFrom<String> for AString<'a> {
 #[cfg_attr(feature = "bounded-static", derive(ToStatic))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[serde(transparent)]
 pub struct Tag<'a> {
     pub(crate) inner: Cow<'a, str>,
 }
@@ -503,6 +508,7 @@ impl<'a> TryFrom<String> for Tag<'a> {
 #[cfg_attr(feature = "bounded-static", derive(ToStatic))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[serde(transparent)]
 pub struct Text<'a> {
     pub(crate) inner: Cow<'a, str>,
 }
@@ -632,6 +638,7 @@ impl<'a> TryFrom<String> for Charset<'a> {
 #[cfg_attr(feature = "bounded-static", derive(ToStatic))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[serde(transparent)]
 pub struct NonEmptyVec<T> {
     pub(crate) inner: Vec<T>,
 }

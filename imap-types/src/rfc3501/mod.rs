@@ -82,6 +82,7 @@ impl<'a> From<Atom<'a>> for AuthMechanism<'a> {
 #[cfg_attr(feature = "bounded-static", derive(ToStatic))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[serde(transparent)]
 pub struct AuthMechanismOther<'a> {
     pub(crate) inner: Atom<'a>,
 }
