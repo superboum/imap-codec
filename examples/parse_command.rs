@@ -2,6 +2,7 @@ use std::io::Write;
 
 use ansi_term::Colour::{Blue as ColorServer, Red as ColorClient};
 use imap_codec::rfc3501::command::command;
+use serde_json;
 
 fn main() {
     welcome();
@@ -14,7 +15,8 @@ fn main() {
             // Parser succeeded.
             Ok((remaining, command)) => {
                 // Do something with the command ...
-                println!("{:#?}", command);
+                let command = serde_json::to_string_pretty(&command).unwrap();
+                println!("{}", command);
 
                 // ... and proceed with the remaining data.
                 buffer = remaining.to_vec();

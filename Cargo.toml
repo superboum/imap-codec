@@ -39,6 +39,7 @@ serde = { version = "1.0", features = ["derive"], optional = true }
 [dev-dependencies]
 ansi_term = "0.12"
 criterion = "0.3"
+serde_json = "1.0"
 
 [[bench]]
 name = "parse_command"

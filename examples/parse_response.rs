@@ -1,6 +1,7 @@
 use std::io::{Read, Result as IoResult, Write};
 
 use imap_codec::rfc3501::response::response;
+use serde_json;
 
 pub fn read_file(path: &str) -> IoResult<Vec<u8>> {
     let mut file = std::fs::File::open(path)?;
@@ -18,7 +19,8 @@ fn main() -> std::io::Result<()> {
 
         match response(&data) {
             Ok((remaining, response)) => {
-                println!("{:#?}", response);
+                let response = serde_json::to_string_pretty(&response)?;
+                println!("{}", response);
 
                 if !remaining.is_empty() {
                     println!("Remaining data in buffer: {:?}", remaining);
@@ -48,7 +50,8 @@ fn main() -> std::io::Result<()> {
 
         match response(line.as_bytes()) {
             Ok((remaining, response)) => {
-                println!("{:#?}", response);
+                let response = serde_json::to_string_pretty(&response)?;
+                println!("{}", response);
 
                 if !remaining.is_empty() {
                     println!("Remaining data in buffer: {:?}", remaining);

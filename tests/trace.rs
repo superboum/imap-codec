@@ -3,6 +3,7 @@ use imap_codec::rfc3501::{
     response::{greeting, response},
 };
 use imap_types::codec::Encode;
+use serde_json;
 
 enum Who {
     Client,
@@ -51,32 +52,28 @@ fn test_lines_of_trace(trace: &[u8]) {
 
         match who {
             Who::Client => {
-                println!("C:          {}", String::from_utf8_lossy(&line).trim());
+                println!("// {}", String::from_utf8_lossy(&line).trim());
                 let (rem, parsed) = command(&line).unwrap();
                 assert!(rem.is_empty());
-                println!("Parsed      {:?}", parsed);
+                let parsed_json = serde_json::to_string_pretty(&parsed).unwrap();
+                println!("{}", parsed_json);
                 let mut serialized = Vec::new();
                 parsed.encode(&mut serialized).unwrap();
-                println!(
-                    "Serialized: {}",
-                    String::from_utf8_lossy(&serialized).trim()
-                );
+                println!("// {}", String::from_utf8_lossy(&serialized).trim());
                 let (rem, parsed2) = command(&serialized).unwrap();
                 assert!(rem.is_empty());
                 assert_eq!(parsed, parsed2);
                 println!()
             }
             Who::Server => {
-                println!("S:          {}", String::from_utf8_lossy(&line).trim());
+                println!("// {}", String::from_utf8_lossy(&line).trim());
                 let (rem, parsed) = response(&line).unwrap();
-                println!("Parsed:     {:?}", parsed);
+                let parsed_json = serde_json::to_string_pretty(&parsed).unwrap();
+                println!("{}", parsed_json);
                 assert!(rem.is_empty());
                 let mut serialized = Vec::new();
                 parsed.encode(&mut serialized).unwrap();
-                println!(
-                    "Serialized: {}",
-                    String::from_utf8_lossy(&serialized).trim()
-                );
+                println!("// {}", String::from_utf8_lossy(&serialized).trim());
                 let (rem, parsed2) = response(&serialized).unwrap();
                 assert!(rem.is_empty());
                 assert_eq!(parsed, parsed2);
