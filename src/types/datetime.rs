@@ -11,7 +11,7 @@ use crate::codec::Encode;
 
 #[cfg_attr(feature = "serdex", derive(Serialize, Deserialize))]
 #[derive(Clone, Eq, PartialEq, Hash)]
-pub struct MyDateTime(pub(crate) DateTime<FixedOffset>);
+pub struct MyDateTime(pub DateTime<FixedOffset>);
 
 impl Debug for MyDateTime {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
