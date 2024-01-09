@@ -480,14 +480,14 @@ pub(crate) fn fetch(input: &[u8]) -> IMAPResult<&[u8], CommandBody> {
 /// `store = "STORE" SP sequence-set SP store-att-flags`
 pub(crate) fn store(input: &[u8]) -> IMAPResult<&[u8], CommandBody> {
     let modifier_val_parser = alt((
-        map(sequence_set, |sq| StoreModifier::SequenceSet(sq)), 
         map(number, |num| StoreModifier::Value(num)),
+        map(sequence_set, |sq| StoreModifier::SequenceSet(sq)), 
         map(astring, |astr| StoreModifier::Arbitrary(astr)),
     ));
     let modifiers_parser = opt(delimited(
         tag(b"("), 
         separated_list1(sp, map(tuple((atom, sp, modifier_val_parser)), |(k, _, v)| (k, v))), 
-        tag(b")")));
+        tag(b") ")));
     let mut parser = tuple((tag_no_case(b"STORE"), sp, sequence_set, sp, modifiers_parser, store_att_flags));
 
     let (remaining, (_, _, sequence_set, _, maybe_modifiers, (kind, response, flags))) = parser(input)?;
