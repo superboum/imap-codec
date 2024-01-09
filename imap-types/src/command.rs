@@ -16,7 +16,7 @@ use crate::core::{IString, NString};
 use crate::{
     auth::AuthMechanism,
     command::error::{AppendError, CopyError, ListError, LoginError, RenameError},
-    core::{AString, Charset, Literal, NonEmptyVec, Tag},
+    core::{Atom, AString, Charset, Literal, NonEmptyVec, Tag},
     datetime::DateTime,
     extensions::{compress::CompressionAlgorithm, enable::CapabilityEnable, quota::QuotaSet},
     fetch::MacroOrMessageDataItemNames,
@@ -386,6 +386,8 @@ pub enum CommandBody<'a> {
     Select {
         /// Mailbox.
         mailbox: Mailbox<'a>,
+        /// Optional parameters according to RFC466 section 2.1
+        parameters: Option<NonEmptyVec<Atom<'a>>>,
     },
 
     /// Unselect a mailbox.
@@ -415,6 +417,8 @@ pub enum CommandBody<'a> {
     Examine {
         /// Mailbox.
         mailbox: Mailbox<'a>,
+        /// Optional parameters according to RFC466 section 2.1
+        parameters: Option<NonEmptyVec<Atom<'a>>>,
     },
 
     /// ### 6.3.3.  CREATE Command
@@ -1427,6 +1431,7 @@ impl<'a> CommandBody<'a> {
     {
         Ok(CommandBody::Select {
             mailbox: mailbox.try_into()?,
+            parameters: None,
         })
     }
 
@@ -1437,6 +1442,7 @@ impl<'a> CommandBody<'a> {
     {
         Ok(CommandBody::Examine {
             mailbox: mailbox.try_into()?,
+            parameters: None,
         })
     }
 
@@ -1917,6 +1923,7 @@ mod tests {
             (
                 CommandBody::Select {
                     mailbox: Mailbox::Inbox,
+                    parameters: None,
                 },
                 "SELECT",
             ),
@@ -1924,6 +1931,7 @@ mod tests {
             (
                 CommandBody::Examine {
                     mailbox: Mailbox::Inbox,
+                    parameters: None,
                 },
                 "EXAMINE",
             ),

@@ -342,16 +342,34 @@ impl<'a> EncodeIntoContext for CommandBody<'a> {
                 ctx.write_all(b" ")?;
                 password.declassify().encode_ctx(ctx)
             }
-            CommandBody::Select { mailbox } => {
+            CommandBody::Select { mailbox, parameters } => {
                 ctx.write_all(b"SELECT")?;
                 ctx.write_all(b" ")?;
-                mailbox.encode_ctx(ctx)
+                mailbox.encode_ctx(ctx)?;
+                if let Some(p) = parameters {
+                    ctx.write_all(b" (")?;
+                    for atom in p.as_ref().iter() {
+                        atom.encode_ctx(ctx)?;
+                    }
+                    ctx.write_all(b")")?;
+                }
+
+                Ok(())
             }
             CommandBody::Unselect => ctx.write_all(b"UNSELECT"),
-            CommandBody::Examine { mailbox } => {
+            CommandBody::Examine { mailbox, parameters } => {
                 ctx.write_all(b"EXAMINE")?;
                 ctx.write_all(b" ")?;
-                mailbox.encode_ctx(ctx)
+                mailbox.encode_ctx(ctx)?;
+                if let Some(p) = parameters {
+                    ctx.write_all(b" (")?;
+                    for atom in p.as_ref().iter() {
+                        atom.encode_ctx(ctx)?;
+                    }
+                    ctx.write_all(b")")?;
+                }
+
+                Ok(())
             }
             CommandBody::Create { mailbox } => {
                 ctx.write_all(b"CREATE")?;
