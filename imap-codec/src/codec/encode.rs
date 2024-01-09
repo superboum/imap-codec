@@ -61,7 +61,7 @@ use imap_types::{
         BasicFields, Body, BodyExtension, BodyStructure, Disposition, Language, Location,
         MultiPartExtensionData, SinglePartExtensionData, SpecificFields,
     },
-    command::{Command, CommandBody},
+    command::{Command, CommandBody, StoreModifier},
     core::{
         AString, Atom, AtomExt, Charset, IString, Literal, LiteralMode, NString, Quoted,
         QuotedChar, Tag, Text,
@@ -498,6 +498,7 @@ impl<'a> EncodeIntoContext for CommandBody<'a> {
                 kind,
                 response,
                 flags,
+                modifiers,
                 uid,
             } => {
                 if *uid {
@@ -508,6 +509,32 @@ impl<'a> EncodeIntoContext for CommandBody<'a> {
 
                 sequence_set.encode_ctx(ctx)?;
                 ctx.write_all(b" ")?;
+
+                if !modifiers.is_empty() {
+                    ctx.write_all(b" (")?;
+                    let mut mod_iter = modifiers.iter().peekable();
+                    while let Some((k, x)) = mod_iter.next() {
+                        k.encode_ctx(ctx)?;
+                        ctx.write_all(b" ")?;
+                        match x {
+                            StoreModifier::Value(num) => {
+                                num.encode_ctx(ctx)?;
+                            },
+                            StoreModifier::SequenceSet(seq) => {
+                                seq.encode_ctx(ctx)?;
+                            },
+                            StoreModifier::Arbitrary(val) => {
+                                ctx.write_all(b"(")?;
+                                val.encode_ctx(ctx)?;
+                                ctx.write_all(b")")?;
+                            }
+                        }
+                        if mod_iter.peek().is_some() {
+                            ctx.write_all(b" ")?;
+                        }
+                    }
+                    ctx.write_all(b") ")?;
+                }
 
                 match kind {
                     StoreType::Add => ctx.write_all(b"+")?,

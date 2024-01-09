@@ -7,7 +7,7 @@ use abnf_core::streaming::crlf_relaxed as crlf;
 use abnf_core::streaming::sp;
 use imap_types::{
     auth::AuthMechanism,
-    command::{Command, CommandBody},
+    command::{Command, CommandBody, StoreModifier},
     core::{AString, NonEmptyVec},
     fetch::{Macro, MacroOrMessageDataItemNames},
     flag::{Flag, StoreResponse, StoreType},
@@ -25,7 +25,7 @@ use nom::{
 use crate::extensions::id::id;
 use crate::{
     auth::auth_type,
-    core::{astring, atom, base64, literal, tag_imap},
+    core::{astring, atom, base64, literal, number, tag_imap},
     datetime::date_time,
     decode::{IMAPErrorKind, IMAPResult},
     extensions::{
@@ -479,9 +479,19 @@ pub(crate) fn fetch(input: &[u8]) -> IMAPResult<&[u8], CommandBody> {
 
 /// `store = "STORE" SP sequence-set SP store-att-flags`
 pub(crate) fn store(input: &[u8]) -> IMAPResult<&[u8], CommandBody> {
-    let mut parser = tuple((tag_no_case(b"STORE"), sp, sequence_set, sp, store_att_flags));
+    let modifier_val_parser = alt((
+        map(sequence_set, |sq| StoreModifier::SequenceSet(sq)), 
+        map(number, |num| StoreModifier::Value(num)),
+        map(astring, |astr| StoreModifier::Arbitrary(astr)),
+    ));
+    let modifiers_parser = opt(delimited(
+        tag(b"("), 
+        separated_list1(sp, map(tuple((atom, sp, modifier_val_parser)), |(k, _, v)| (k, v))), 
+        tag(b")")));
+    let mut parser = tuple((tag_no_case(b"STORE"), sp, sequence_set, sp, modifiers_parser, store_att_flags));
 
-    let (remaining, (_, _, sequence_set, _, (kind, response, flags))) = parser(input)?;
+    let (remaining, (_, _, sequence_set, _, maybe_modifiers, (kind, response, flags))) = parser(input)?;
+    let modifiers = maybe_modifiers.unwrap_or(vec![]);
 
     Ok((
         remaining,
@@ -490,6 +500,7 @@ pub(crate) fn store(input: &[u8]) -> IMAPResult<&[u8], CommandBody> {
             kind,
             response,
             flags,
+            modifiers,
             uid: false,
         },
     ))

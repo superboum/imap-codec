@@ -1114,6 +1114,8 @@ pub enum CommandBody<'a> {
         response: StoreResponse,
         /// Flags.
         flags: Vec<Flag<'a>>, // FIXME(misuse): must not accept "\*" or "\Recent"
+        /// Modifiers.
+        modifiers: Vec<(Atom<'a>, StoreModifier<'a>)>,
         /// Use UID variant.
         uid: bool,
     },
@@ -1591,6 +1593,7 @@ impl<'a> CommandBody<'a> {
         kind: StoreType,
         response: StoreResponse,
         flags: Vec<Flag<'a>>,
+        modifiers: Vec<(Atom<'a>, StoreModifier<'a>)>,
         uid: bool,
     ) -> Result<Self, S::Error>
     where
@@ -1603,6 +1606,7 @@ impl<'a> CommandBody<'a> {
             kind,
             response,
             flags,
+            modifiers,
             uid,
         })
     }
@@ -1664,6 +1668,15 @@ impl<'a> CommandBody<'a> {
             Self::Id { .. } => "ID",
         }
     }
+}
+#[cfg_attr(feature = "arbitrary", derive(Arbitrary))]
+#[cfg_attr(feature = "bounded-static", derive(ToStatic))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum StoreModifier<'a> {
+    Value(u32),
+    SequenceSet(SequenceSet),
+    Arbitrary(AString<'a>),
 }
 
 /// Error-related types.
